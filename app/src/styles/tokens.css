@@ -1,0 +1,75 @@
+/* Design System "Finanças" — Entrega 2 (aprovado e congelado). Só tema claro. */
+:root {
+  /* Institucional */
+  --superficie: #ffffff;
+  --fundo: #f3f4f6;
+  --divisoria: #d0d3d8;
+  --texto-secundario: #555c66;
+  --texto: #0e0f13;
+  --acao: #0e0f13;
+  --sobre-acao: #ffffff;
+  --borda-campo: rgba(85, 92, 102, 0.7);
+  --sobreposicao: rgba(14, 15, 19, 0.4);
+  --estado-hover: rgba(14, 15, 19, 0.04);
+  --estado-pressionado: rgba(14, 15, 19, 0.08);
+
+  /* Informativas */
+  --entrada: #15803d;
+  --entrada-fundo: #eaf6ee;
+  --saida: #dc2626;
+  --saida-fundo: #fdecec;
+  --erro: #b91c1c;
+  --erro-fundo: #fdecec;
+  --aviso: #92400e;
+  --aviso-fundo: #fef3c7;
+  --informacao: #1d4ed8;
+  --informacao-fundo: #eff4ff;
+  --sucesso-escuro: #22c55e;
+
+  /* Categorias e ambientes (ordem fixa) */
+  --cat-0: #555c66;
+  --cat-1: #2563eb;
+  --cat-2: #db2777;
+  --cat-3: #7c3aed;
+  --cat-4: #0d9488;
+  --cat-5: #4f46e5;
+  --cat-6: #b45309;
+  --cat-7: #0891b2;
+  --cat-8: #d97706;
+  --cat-9: #c026d3;
+  --cat-10: #a16207;
+
+  /* Raios */
+  --raio-pequeno: 8px;
+  --raio-medio: 12px;
+  --raio-grande: 16px;
+  --raio-pilula: 999px;
+
+  /* Sombras */
+  --sombra-1: 0 1px 2px rgba(14, 15, 19, 0.06);
+  --sombra-2: 0 4px 12px rgba(14, 15, 19, 0.12);
+  --sombra-3: 0 -8px 24px rgba(14, 15, 19, 0.16);
+
+  /* Espaços */
+  --e1: 4px;
+  --e2: 8px;
+  --e3: 12px;
+  --e4: 16px;
+  --e6: 24px;
+  --e8: 32px;
+  --e12: 48px;
+
+  --margem: 16px;
+  --alvo: 48px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+
+  --fonte: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+@media (min-width: 600px) {
+  :root { --margem: 24px; }
+}
+@media (min-width: 1024px) {
+  :root { --margem: 32px; --alvo: 40px; }
+}

@@ -1,0 +1,23 @@
+import { chromium } from 'playwright'
+const OUT = process.env.OUT
+const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
+const p = await (await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 })).newPage()
+const erros = []; p.on('pageerror', e => erros.push(e.message))
+await p.goto('file://' + process.cwd() + '/dist/index.html')
+await p.fill('#email', 'a@b.com'); await p.fill('#senha', 'x'); await p.click('button[type=submit]')
+await p.waitForSelector('text=Para onde foi')
+await p.click('.barra-mais'); await p.fill('#valor', '4590'); await p.click('.cat-op >> nth=1')
+await p.click('text=Mais detalhes'); await p.click('text=Adicionar foto')
+await p.locator('input[type=file]:not([capture])').setInputFiles(process.env.IMG)
+await p.waitForSelector('text=Nova foto'); await p.waitForTimeout(300)
+await p.screenshot({ path: OUT + '/foto-1.png' })
+await p.click('.miniatura'); await p.waitForTimeout(400); await p.screenshot({ path: OUT + '/foto-2-visualizador.png' })
+await p.click('.visualizador [aria-label=Fechar]')
+await p.click('button[type=submit][form=form-lanc]'); await p.waitForTimeout(1500)
+await p.screenshot({ path: OUT + '/foto-3-salvo.png' })
+// excluir pelo menu e desfazer
+await p.click('.item-lanc >> nth=0'); await p.click('[aria-label="Mais ações"]'); await p.click('[role=menuitem]:has-text("Excluir")')
+await p.waitForTimeout(400); await p.screenshot({ path: OUT + '/foto-4-excluido.png' })
+await p.click('.toast button'); await p.waitForTimeout(600); await p.screenshot({ path: OUT + '/foto-5-restaurado.png' })
+console.log(erros.join('\n') || 'ok')
+await b.close()

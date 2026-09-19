@@ -1,0 +1,104 @@
+/* ---------- Casca responsiva ---------- */
+.casca { min-height: 100dvh; }
+.conteudo { padding-bottom: calc(112px + var(--safe-bottom)); min-height: 100dvh; }
+.pagina { max-width: 1360px; margin: 0 auto; display: flex; flex-direction: column; }
+.pagina > .bloco { margin: 0 var(--margem); }
+
+.faixa-ambiente { height: 3px; width: 100%; }
+.barra-topo { position: sticky; top: 0; z-index: 20; background: var(--fundo); padding-top: var(--safe-top); }
+.barra-topo-in { height: 56px; display: flex; align-items: center; gap: 4px; padding: 0 4px 0 var(--margem); max-width: 1360px; margin: 0 auto; }
+
+/* Barra inferior (celular) */
+.barra-inferior {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+  height: calc(64px + var(--safe-bottom)); padding-bottom: var(--safe-bottom);
+  background: var(--superficie); border-top: 1px solid var(--divisoria);
+  display: grid; grid-template-columns: 1fr 1fr 72px 1fr 1fr; align-items: center;
+}
+.barra-item {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 56px;
+  text-decoration: none; color: var(--texto-secundario); font-size: 12px; line-height: 16px; font-weight: 500;
+}
+.barra-item[aria-current="page"] { color: var(--texto); font-weight: 600; }
+.barra-mais-slot { position: relative; height: 64px; }
+.barra-mais {
+  position: absolute; left: 8px; top: -12px; width: 56px; height: 56px; border: 0; border-radius: 50%;
+  background: var(--acao); color: var(--sobre-acao); box-shadow: var(--sombra-2);
+  display: flex; align-items: center; justify-content: center;
+}
+.barra-mais:active { transform: scale(0.96); }
+
+/* Trilho (tablet) e menu lateral (computador) ficam ocultos no celular */
+.trilho, .menu-lateral { display: none; }
+.so-compacto-medio { display: contents; }
+
+@media (min-width: 600px) {
+  .barra-inferior { display: none; }
+  .conteudo { padding-left: 80px; padding-bottom: 48px; }
+  .trilho {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    position: fixed; left: 0; top: 0; bottom: 0; width: 80px; z-index: 30;
+    background: var(--superficie); border-right: 1px solid var(--divisoria); padding: 16px 0;
+  }
+  .trilho-mais {
+    width: 56px; height: 56px; border: 0; border-radius: 16px; background: var(--acao); color: var(--sobre-acao);
+    display: flex; align-items: center; justify-content: center; margin-bottom: 16px; box-shadow: var(--sombra-2);
+  }
+  .trilho-item {
+    width: 72px; min-height: 56px; border-radius: 12px; text-decoration: none; color: var(--texto-secundario);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    font-size: 12px; line-height: 16px; font-weight: 500;
+  }
+  .trilho-item:hover { background: var(--estado-hover); }
+  .trilho-item[aria-current="page"] { color: var(--texto); font-weight: 600; }
+  .trilho-item[aria-current="page"] .ms { background: var(--fundo); border-radius: 999px; width: 56px; padding: 4px 0; height: 32px; box-sizing: border-box; text-align: center; }
+}
+
+@media (min-width: 1024px) {
+  .trilho { display: none; }
+  .conteudo { padding-left: 240px; }
+  .menu-lateral {
+    display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; width: 240px; z-index: 30;
+    background: var(--superficie); border-right: 1px solid var(--divisoria);
+  }
+  .menu-topo { padding: 16px 12px; }
+  .menu-topo .pilula-ambiente { box-shadow: inset 0 0 0 1px var(--borda-campo); width: 100%; justify-content: flex-start; }
+  .menu-topo .pilula-ambiente .nome { flex: 1; text-align: left; }
+  .menu-itens { display: flex; flex-direction: column; gap: 2px; padding: 0 12px; }
+  .menu-item {
+    height: 44px; border-radius: 8px; display: flex; align-items: center; gap: 12px; padding: 0 12px;
+    text-decoration: none; color: var(--texto-secundario); font-size: 16px; line-height: 24px; font-weight: 500;
+  }
+  .menu-item:hover { background: var(--estado-hover); }
+  .menu-item[aria-current="page"] { background: var(--fundo); color: var(--texto); font-weight: 600; }
+  .so-compacto-medio { display: none; }
+}
+
+/* Seletor de mês */
+.seletor-mes { height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 4px; }
+.seletor-mes-nome { border: 0; background: transparent; font-size: 16px; line-height: 24px; font-weight: 600; height: 48px; padding: 0 12px; border-radius: 8px; }
+.seletor-mes-nome:hover { background: var(--estado-hover); }
+@media (min-width: 600px) { .seletor-mes { justify-content: flex-start; padding: 0 calc(var(--margem) - 12px); } }
+
+/* Ambientes */
+.item-ambiente {
+  display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 8px 12px; border-radius: 12px;
+  border: 0; background: transparent; width: 100%; color: var(--texto);
+}
+.item-ambiente:hover { background: var(--estado-hover); }
+.item-ambiente.atual { background: var(--fundo); box-shadow: inset 0 0 0 2px var(--acao); }
+.item-ambiente-acao {
+  display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 0 12px; border: 0; background: transparent;
+  color: var(--texto-secundario); font-size: 16px; line-height: 24px; font-weight: 500; border-top: 1px solid var(--divisoria); margin-top: 4px; width: 100%;
+}
+.item-ambiente-acao:hover { background: var(--estado-hover); }
+
+/* Telas de acesso */
+.acesso { min-height: 100dvh; display: flex; justify-content: center; background: var(--fundo); }
+.acesso-in { width: 100%; max-width: 440px; display: flex; flex-direction: column; padding: calc(56px + var(--safe-top)) 16px calc(24px + var(--safe-bottom)); gap: 32px; }
+@media (min-width: 600px) {
+  .acesso { align-items: center; padding: 24px; }
+  .acesso-in { background: var(--superficie); border-radius: 16px; box-shadow: var(--sombra-1); padding: 40px 32px 32px; }
+}
+.marca { display: flex; align-items: center; gap: 12px; }
+.marca .logo { width: 48px; height: 48px; border-radius: 12px; background: var(--acao); color: #fff; display: flex; align-items: center; justify-content: center; }

@@ -1,0 +1,52 @@
+# Publica a versão web (PWA) no GitHub Pages a cada alteração na branch main.
+# Configurar em Settings → Secrets and variables → Actions → Variables:
+#   VITE_SUPABASE_URL       (ex.: https://xxxx.supabase.co)
+#   VITE_SUPABASE_ANON_KEY  (chave pública "anon"/"publishable" — nunca a service_role)
+name: Publicar app
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - run: npm ci
+      - run: npx tsc -b
+      - name: Testes do banco (regras de segurança)
+        run: node scripts/test-schema.mjs
+      - name: Build
+        run: npx vite build
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          BASE_PATH: /${{ github.event.repository.name }}/
+      - run: cp dist/index.html dist/404.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: app/dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
