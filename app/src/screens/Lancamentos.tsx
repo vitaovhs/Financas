@@ -138,10 +138,7 @@ export function Lancamentos() {
           {avancado && <span style={{ position: 'absolute', top: 10, right: 10, width: 8, height: 8, borderRadius: 4, background: 'var(--acao)' }} />}
         </button>
       } />
-      <div className="lanc-cab">
-        <h1 className="t-titulo">Lançamentos</h1>
-        <button type="button" className="btn btn-primario btn-adicionar" onClick={() => abrirLancamento({ modo: 'novo', tipo: tipo ?? undefined })}><Icone n="add" s={20} />Adicionar</button>
-      </div>
+      <div className="lanc-cab"><h1 className="t-titulo">Lançamentos</h1></div>
       {mostrarSeletorMes ? <SeletorMes mes={mes} aoMudar={setMes} /> : <div style={{ height: 12 }} />}
 
       <div className="bloco lanc-layout">
@@ -180,6 +177,8 @@ export function Lancamentos() {
               <span className="t-auxiliar sec">{rotuloPeriodo}{qTotais.data ? ` · ${qTotais.data.quantidade} ${qTotais.data.quantidade === 1 ? 'lançamento' : 'lançamentos'}` : ''}</span>
             </div>
           )}
+
+          <button type="button" className="btn btn-primario btn-largo" onClick={() => abrirLancamento({ modo: 'novo', tipo: tipo ?? undefined })}><Icone n="add" s={20} />Adicionar</button>
 
           {carregando ? (
             <div className="lista-card" style={{ padding: 16, display: 'grid', gap: 16 }}>{[0, 1, 2, 3].map(i => <Esqueleto key={i} h={44} />)}</div>

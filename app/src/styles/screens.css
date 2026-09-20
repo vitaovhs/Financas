@@ -39,8 +39,7 @@
 }
 
 /* ---------- Lançamentos ---------- */
-.lanc-cab { padding: 4px var(--margem) 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.lanc-cab .btn-adicionar { height: 40px; padding: 0 14px 0 10px; font-size: 14px; }
+.lanc-cab { padding: 4px var(--margem) 0; }
 .busca {
   height: 44px; border-radius: 999px; background: var(--superficie); box-shadow: inset 0 0 0 1px var(--borda-campo);
   display: flex; align-items: center; gap: 8px; padding: 0 4px 0 14px; color: var(--texto-secundario);
@@ -56,7 +55,6 @@
 @media (min-width: 1024px) {
   .lanc-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; align-items: start; }
   .lanc-lateral { position: sticky; top: 72px; }
-  .lanc-cab { max-width: min(100% - 344px, 840px + 2 * var(--margem)); }
 }
 
 /* ---------- Folha de lançamento ---------- */
