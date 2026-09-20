@@ -1,6 +1,10 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react'
 
 export function Icone({ n, s, f, className, style, rotulo }: { n: string; s?: 16 | 20 | 24; f?: boolean; className?: string; style?: React.CSSProperties; rotulo?: string }) {
+  if (n.startsWith('txt:')) {
+    const t = n.slice(4, 6)
+    return <span className={['ms-txt', s === 20 ? 's20' : s === 16 ? 's16' : '', className ?? ''].filter(Boolean).join(' ')} style={style} aria-hidden={rotulo ? undefined : true} aria-label={rotulo} role={rotulo ? 'img' : undefined}>{t}</span>
+  }
   const cls = ['ms', s === 20 ? 's20' : s === 16 ? 's16' : '', f ? 'f' : '', className ?? ''].filter(Boolean).join(' ')
   return <span className={cls} style={style} aria-hidden={rotulo ? undefined : true} aria-label={rotulo} role={rotulo ? 'img' : undefined}>{n}</span>
 }

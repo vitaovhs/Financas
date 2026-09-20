@@ -43,6 +43,8 @@ h1, h2, h3, p { margin: 0; }
   font-feature-settings: "liga"; -webkit-font-feature-settings: "liga";
   flex: none; user-select: none;
 }
+.ms-txt { --t: 24px; display: inline-flex; align-items: center; justify-content: center; width: var(--t); height: var(--t); flex: none; font-family: inherit; font-weight: 700; font-size: calc(var(--t) * 0.72); line-height: 1; user-select: none; }
+.ms-txt.s20 { --t: 20px; } .ms-txt.s16 { --t: 16px; }
 .ms.s20 { font-size: 20px; font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 20; }
 .ms.s16 { font-size: 16px; font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 20; }
 .ms.f { font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24; }

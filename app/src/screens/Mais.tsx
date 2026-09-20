@@ -12,7 +12,7 @@ import { CampoSenha } from './Acesso'
 import { ICONES_AMBIENTE, ICONES_CATEGORIA } from '../lib/icones'
 import { dataCurta, dataHora } from '../lib/format'
 
-export const VERSAO = '0.3.6 · Entrega 3'
+export const VERSAO = '0.3.7 · Entrega 3'
 
 function msgErro(e: unknown): string {
   const m = ((e as Error)?.message ?? '').toLowerCase()
@@ -240,7 +240,7 @@ function EditarCategoria({ categoria, tipo, todas, aoFechar, aoSalvar }: { categ
                 <span className="t-auxiliar sec">{g.grupo}</span>
                 <div className="grade-icones">
                   {g.icones.map(i => (
-                    <button key={i} type="button" aria-pressed={icone === i} aria-label={i.replace(/_/g, ' ')} onClick={() => setIcone(i)}><Icone n={i} s={20} f={icone === i} /></button>
+                    <button key={i} type="button" aria-pressed={icone === i} aria-label={i.startsWith('txt:') ? i.slice(4) : i.replace(/_/g, ' ')} onClick={() => setIcone(i)}><Icone n={i} s={20} f={icone === i} /></button>
                   ))}
                 </div>
               </div>
