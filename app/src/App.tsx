@@ -3,7 +3,7 @@ import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { repo } from './data'
 import { tipoLinkInicial } from './data/supabaseRepo'
-import type { Sessao } from './data/types'
+import type { Ambiente, Perfil as PerfilT, Sessao } from './data/types'
 import { AppProvider } from './state/app'
 import { Casca } from './components/shell'
 import { AceitarConvite, boasVindas, CriarAcesso, Login, NovaSenha, RecuperarSenha, TudoPronto } from './screens/Acesso'
@@ -87,7 +87,7 @@ function Logado({ sessao }: { sessao: Sessao }) {
     return <div className="acesso"><div className="acesso-in"><EstadoVazio icone="folder_off" titulo="Nenhum ambiente encontrado" texto="Fale com o administrador do aplicativo." /></div></div>
   }
   return (
-    <AppProvider sessao={sessao} perfil={qPerfil.data} ambientes={qAmb.data}>
+    <AppProvider sessao={sessao} perfil={qPerfil.data} ambientes={comNomeDaPessoa(qAmb.data, qPerfil.data)}>
       <Casca>
         <Routes>
           <Route path="/" element={<Inicio />} />
@@ -106,4 +106,11 @@ function Logado({ sessao }: { sessao: Sessao }) {
       <LancamentoFolha />
     </AppProvider>
   )
+}
+
+// O ambiente pessoal de cada um aparece com o nome cadastrado da pessoa (enquanto não for renomeado)
+function comNomeDaPessoa(ambientes: Ambiente[], perfil: PerfilT): Ambiente[] {
+  const nome = perfil.name?.trim()
+  if (!nome) return ambientes
+  return ambientes.map(a => a.id === perfil.default_workspace_id && a.kind === 'pessoal' && a.name === 'Pessoal' ? { ...a, name: nome } : a)
 }
