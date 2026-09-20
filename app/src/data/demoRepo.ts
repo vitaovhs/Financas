@@ -1,16 +1,17 @@
 // Modo demonstração: mesmos contratos do Supabase, dados fictícios na memória do navegador.
 // Serve para experimentar o app sem conta e para testes visuais.
 import { INICIAIS } from './categoriasIniciais'
-import type { Ambiente, Anexo, Categoria, EventoAuth, Filtros, Lancamento, Perfil, Repositorio, Sessao } from './types'
+import type { Ambiente, Anexo, Categoria, Convite, EventoAuth, Filtros, Lancamento, Perfil, Repositorio, Sessao } from './types'
 import { hojeIso, isoData, parseIso } from '../lib/format'
 
 interface Estado {
   sessao: Sessao | null
-  perfil: Omit<Perfil, 'email' | 'is_admin'>
+  perfil: Omit<Perfil, 'email' | 'is_admin' | 'disabled_at'>
   ambientes: Ambiente[]
   categorias: Categoria[]
   lancamentos: Lancamento[]
   fotos: Record<string, string> // path → data URL
+  convites?: (Convite & { token: string })[]
 }
 
 const CHAVE = 'financas-demo-v1'
@@ -162,7 +163,7 @@ export function criarRepoDemo(opcoes: { entrarDireto?: boolean; persistir?: bool
     async enviarRecuperacao() { await espera(500) },
     async definirSenha() { await espera(300) },
 
-    async perfil() { return { ...st.perfil, email: st.sessao?.email ?? EMAIL, is_admin: true } },
+    async perfil() { return { ...st.perfil, email: st.sessao?.email ?? EMAIL, is_admin: true, disabled_at: null } },
     async atualizarPerfil(d) { st.perfil = { ...st.perfil, ...d }; salvar() },
     async ambientes() { await espera(60); return copia(st.ambientes.filter(a => !a.archived_at)) },
     async criarAmbiente(nome, tipo) {
@@ -219,6 +220,62 @@ export function criarRepoDemo(opcoes: { entrarDireto?: boolean; persistir?: bool
       st.lancamentos = st.lancamentos.filter(l => !(l.workspace_id === ws && l.deleted_at && Date.parse(l.deleted_at) < limite))
       salvar()
     },
+
+    async criarCategoria(ws, c) {
+      const sort = Math.max(0, ...st.categorias.filter(x => x.workspace_id === ws && x.kind === c.kind && !x.is_other).map(x => x.sort)) + 1
+      if (st.categorias.some(x => x.workspace_id === ws && x.kind === c.kind && normaliza(x.name) === normaliza(c.name.trim()))) throw new Error('duplicate key value violates unique constraint')
+      const nova: Categoria = { id: uuid(), workspace_id: ws, kind: c.kind, name: c.name.trim(), icon: c.icon, color: c.color, sort, is_other: false, archived_at: null }
+      st.categorias.push(nova); salvar(); return copia(nova)
+    },
+    async editarCategoria(id, patch) {
+      const c = st.categorias.find(x => x.id === id); if (!c) return
+      if (patch.name && st.categorias.some(x => x.id !== id && x.workspace_id === c.workspace_id && x.kind === c.kind && normaliza(x.name) === normaliza(patch.name!.trim()))) throw new Error('duplicate key value violates unique constraint')
+      if (c.is_other && patch.archived_at) throw new Error('A categoria Outros não pode ser arquivada')
+      Object.assign(c, patch); salvar()
+    },
+    async reordenarCategorias(ids) { ids.forEach((id, i) => { const c = st.categorias.find(x => x.id === id); if (c) c.sort = i + 1 }); salvar() },
+    async usoCategoria(id) { return st.lancamentos.filter(l => l.category_id === id).length },
+    async moverLancamentos(de, para) { st.lancamentos.forEach(l => { if (l.category_id === de) l.category_id = para }); salvar() },
+    async excluirCategoria(id) {
+      const c = st.categorias.find(x => x.id === id)
+      if (c?.is_other) throw new Error('A categoria Outros não pode ser excluída')
+      if (st.lancamentos.some(l => l.category_id === id)) throw new Error('violates foreign key constraint')
+      st.categorias = st.categorias.filter(x => x.id !== id); salvar()
+    },
+    async todosAmbientes() { return copia(st.ambientes) },
+    async editarAmbiente(id, patch) { const a = st.ambientes.find(x => x.id === id); if (a) Object.assign(a, patch); salvar() },
+    async lixeira(ws) { await espera(); return copia(st.lancamentos.filter(l => l.workspace_id === ws && l.deleted_at).sort((a, b) => b.deleted_at!.localeCompare(a.deleted_at!))) },
+    async trocarSenha(atual) { await espera(300); if (!atual) throw Object.assign(new Error('Senha atual incorreta'), { code: 'senha_atual' }) },
+    async sairDeTodos() { st.sessao = null; salvar(); emitir('SIGNED_OUT') },
+    async validarConvite(token) {
+      const c = st.convites?.find(x => x.token === token)
+      if (!c) return null
+      const situacao = c.accepted_at ? 'usado' : c.revoked_at ? 'revogado' : Date.parse(c.expires_at) < Date.now() ? 'vencido' : 'valido'
+      return { email: c.email, situacao }
+    },
+    async aceitarConvite(token) {
+      await espera(400)
+      const c = st.convites?.find(x => x.token === token)
+      if (c) c.accepted_at = new Date().toISOString()
+      st.sessao = { userId: USER, email: c?.email ?? EMAIL }; salvar(); emitir('SIGNED_IN')
+    },
+    async criarConvite(email) {
+      await espera(300)
+      const e = email.trim().toLowerCase()
+      const token = uuid().replace(/-/g, '') + uuid().replace(/-/g, '')
+      const c = { id: uuid(), email: e, token, created_at: new Date().toISOString(), expires_at: new Date(Date.now() + 7 * 86400000).toISOString(), accepted_at: null, revoked_at: null, situacao: 'pendente' as const }
+      st.convites = [c, ...(st.convites ?? []).map(x => x.email === e && !x.accepted_at ? { ...x, revoked_at: x.revoked_at ?? new Date().toISOString() } : x)]
+      salvar(); return { id: c.id, email: e, token, expires_at: c.expires_at }
+    },
+    async convites() {
+      return (st.convites ?? []).map(c => ({ ...c, situacao: c.accepted_at ? 'aceito' : c.revoked_at ? 'revogado' : Date.parse(c.expires_at) < Date.now() ? 'vencido' : 'pendente' } as Convite))
+    },
+    async revogarConvite(id) { const c = st.convites?.find(x => x.id === id); if (c && !c.accepted_at) c.revoked_at = new Date().toISOString(); salvar() },
+    async usuarios() {
+      return [{ id: USER, email: st.sessao?.email ?? EMAIL, name: st.perfil.name, created_at: '2026-01-01T12:00:00Z', last_sign_in_at: new Date().toISOString(), disabled_at: null, is_admin: true },
+        { id: 'u2', email: 'pai@exemplo.com', name: 'José', created_at: '2026-09-10T12:00:00Z', last_sign_in_at: '2026-09-18T12:00:00Z', disabled_at: null, is_admin: false }]
+    },
+    async desativarUsuario() { await espera(200) },
 
     async anexarFoto(ws, txId, foto, substituir) {
       await espera(500)

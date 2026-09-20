@@ -172,3 +172,21 @@
   .tabela-meses td:last-child { display: none; }
   .tabela-meses th:last-child:empty { display: none; }
 }
+
+/* ---------- Mais ---------- */
+.mais-conteudo { display: flex; flex-direction: column; gap: 16px; max-width: 720px; margin-top: 12px; }
+.avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--acao); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 18px; flex: none; }
+.item-cat { display: flex; align-items: center; border-top: 1px solid var(--divisoria); }
+.item-cat:first-child { border-top: 0; }
+.item-cat .item-lanc { flex: 1; }
+.reordenar { display: flex; padding-right: 8px; }
+.reordenar .btn-icone:disabled { opacity: 0.3; }
+.cores { display: grid; grid-template-columns: repeat(5, 48px); gap: 12px; }
+@media (min-width: 400px) { .cores { grid-template-columns: repeat(10, 36px); gap: 8px; } }
+.cores button { width: 100%; aspect-ratio: 1; border: 0; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; }
+.cores button[aria-checked="true"] { box-shadow: 0 0 0 2px var(--superficie), 0 0 0 4px var(--acao); }
+.grade-icones { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 4px; }
+.grade-icones button { height: 44px; border: 0; border-radius: 10px; background: transparent; color: var(--texto-secundario); display: flex; align-items: center; justify-content: center; }
+.grade-icones button:hover { background: var(--estado-hover); }
+.grade-icones button[aria-pressed="true"] { background: var(--acao); color: #fff; }
+.link-convite { padding: 12px; border-radius: 8px; background: var(--fundo); font-size: 13px; line-height: 18px; word-break: break-all; user-select: all; }

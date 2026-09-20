@@ -6,6 +6,7 @@ const db = new PGlite({ extensions: { pg_trgm, unaccent } })
 const dir = new URL('../../supabase/tests/', import.meta.url).pathname
 await db.exec(fs.readFileSync(dir + 'stub.sql', 'utf8'))
 await db.exec(fs.readFileSync(dir + '../migrations/0001_inicial.sql', 'utf8'))
+await db.exec(`alter table auth.users add column if not exists created_at timestamptz default now(), add column if not exists last_sign_in_at timestamptz;`)
 await db.exec(`grant all on all tables in schema storage to authenticated; revoke all on all tables in schema public from anon;`)
 const q = (s, p) => db.query(s, p).then(r => r.rows)
 let ok = 0, fail = 0
@@ -15,6 +16,7 @@ const expectErr = async (p) => { let e; try { await p } catch (x) { e = x } if (
 const [a] = await q(`insert into auth.users (email, raw_user_meta_data) values ('ana@x.com', '{"name":"Ana"}') returning id`)
 const [b] = await q(`insert into auth.users (email) values ('bia@x.com') returning id`)
 const A = a.id, B = b.id
+await db.exec(fs.readFileSync(dir + '../migrations/0002_convites_admin.sql', 'utf8'))
 const uuid = () => crypto.randomUUID()
 await t('novo usuário ganha perfil, Pessoal e categorias', async () => {
   const r = await as(A, () => q(`select w.name, (select count(*) from categories c where c.workspace_id=w.id)::int n, p.name pn from workspaces w, profiles p`))
@@ -91,5 +93,48 @@ await t('anon não lê nada', () => expectErr((async () => { await db.exec('set 
 await t('excluir ambiente em cascata funciona', async () => {
   const w = (await as(A, () => q(`select id from workspaces where name='Empresa'`)))[0].id
   await q(`delete from workspaces where id=$1`, [w])
+})
+await t('0002: primeiro usuário vira admin', async () => {
+  const r = await q(`select user_id from platform_roles`); if (r.length !== 1 || r[0].user_id !== A) throw new Error(JSON.stringify(r))
+})
+await t('0002: cadastro sem convite é bloqueado', () => expectErr(q(`insert into auth.users (email) values ('x@x.com')`)))
+let token
+await t('0002: B (não admin) não cria convite', () => expectErr(as(B, () => q(`select * from criar_convite('pai@x.com')`))))
+await t('0002: admin cria convite e token valida', async () => {
+  const r = await as(A, () => q(`select * from criar_convite('Pai@X.com ')`)); token = r[0].token
+  if (r[0].email !== 'pai@x.com' || token.length !== 64) throw new Error(JSON.stringify(r))
+  await db.exec('set role anon'); const v = await q(`select * from validar_convite($1)`, [token]); await db.exec('reset role')
+  if (v[0]?.situacao !== 'valido') throw new Error(JSON.stringify(v))
+})
+await t('0002: convite de outro e-mail é recusado', () => expectErr(q(`insert into auth.users (email, raw_user_meta_data) values ('outro@x.com', $1)`, [JSON.stringify({ convite: token })])))
+let C
+await t('0002: cadastro com convite cria acesso já concluído, sem guardar o token', async () => {
+  const [c] = await q(`insert into auth.users (email, raw_user_meta_data) values ('pai@x.com', $1) returning id, raw_user_meta_data`, [JSON.stringify({ convite: token, name: 'Pai' })]); C = c.id
+  if (c.raw_user_meta_data.convite) throw new Error('token guardado')
+  const p = await q(`select name, onboarded_at from profiles where id=$1`, [C]); if (p[0].name !== 'Pai' || !p[0].onboarded_at) throw new Error(JSON.stringify(p))
+})
+await t('0002: convite não pode ser usado duas vezes', () => expectErr(q(`insert into auth.users (email, raw_user_meta_data) values ('pai@x.com', $1)`, [JSON.stringify({ convite: token })])))
+await t('0002: admin lista usuários; B não', async () => {
+  const r = await as(A, () => q(`select * from admin_usuarios()`)); if (r.length !== 3) throw new Error('n=' + r.length)
+  const r2 = await as(B, () => q(`select * from admin_usuarios()`)); if (r2.length) throw new Error('B viu usuários')
+})
+await t('0002: usuário não reativa a si mesmo', async () => {
+  await as(A, () => q(`select admin_desativar($1, true)`, [C]))
+  await as(C, () => q(`update profiles set disabled_at = null, name='Pai 2' where id=$1`, [C]))
+  const p = await q(`select name, disabled_at from profiles where id=$1`, [C]); if (!p[0].disabled_at || p[0].name !== 'Pai 2') throw new Error(JSON.stringify(p))
+})
+await t('0002: desativado não vê o próprio ambiente', async () => {
+  const r = await as(C, () => q(`select count(*)::int n from workspaces`)); if (r[0].n) throw new Error('viu')
+  await as(A, () => q(`select admin_desativar($1, false)`, [C]))
+  const r2 = await as(C, () => q(`select count(*)::int n from workspaces`)); if (r2[0].n !== 1) throw new Error('não voltou')
+})
+await t('0002: mover lançamentos entre categorias e excluir a antiga', async () => {
+  const outra = (await as(A, () => q(`select id from categories where workspace_id=$1 and name='Alimentação'`, [wsA])))[0].id
+  const n = await as(A, () => q(`select mover_lancamentos_categoria($1,$2) n`, [catA, outra])); if (n[0].n !== 1) throw new Error('n=' + n[0].n)
+  await as(A, () => q(`delete from categories where id=$1`, [catA]))
+})
+await t('0002: B não move lançamentos de A', async () => {
+  const cats = await as(A, () => q(`select id from categories where workspace_id=$1 and kind='saida' limit 2`, [wsA]))
+  const n = await as(B, () => q(`select mover_lancamentos_categoria($1,$2) n`, [cats[0].id, cats[1].id])); if (n[0].n !== 0) throw new Error('moveu')
 })
 console.log(`\n${ok} ok, ${fail} falhas`); process.exit(fail ? 1 : 0)

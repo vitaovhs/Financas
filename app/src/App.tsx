@@ -6,11 +6,11 @@ import { tipoLinkInicial } from './data/supabaseRepo'
 import type { Sessao } from './data/types'
 import { AppProvider } from './state/app'
 import { Casca } from './components/shell'
-import { CriarAcesso, Login, NovaSenha, RecuperarSenha, TudoPronto } from './screens/Acesso'
+import { AceitarConvite, boasVindas, CriarAcesso, Login, NovaSenha, RecuperarSenha, TudoPronto } from './screens/Acesso'
 import { Inicio } from './screens/Inicio'
 import { Lancamentos } from './screens/Lancamentos'
 import { LancamentoFolha } from './screens/LancamentoFolha'
-import { Mais } from './screens/Outras'
+import { Ambientes, Categorias, Lixeira, Mais, Perfil, Usuarios } from './screens/Mais'
 import { DetalheCategoria, Relatorios } from './screens/Relatorios'
 import { EstadoVazio } from './components/ui'
 
@@ -42,6 +42,7 @@ export default function App() {
     return (
       <Routes>
         <Route path="/recuperar" element={<RecuperarSenha />} />
+        <Route path="/convite" element={<AceitarConvite />} />
         <Route path="*" element={<Login />} />
       </Routes>
     )
@@ -63,7 +64,7 @@ function Logado({ sessao }: { sessao: Sessao }) {
   const nav = useNavigate()
   const qPerfil = useQuery({ queryKey: ['perfil', sessao.userId], queryFn: () => repo.perfil() })
   const qAmb = useQuery({ queryKey: ['ambientes'], queryFn: () => repo.ambientes() })
-  const [pronto, setPronto] = useState<string | null>(null)
+  const [pronto, setPronto] = useState<string | null>(() => { const n = boasVindas.nome; boasVindas.nome = null; return n })
 
   if (qPerfil.isError || qAmb.isError) {
     return (
@@ -79,6 +80,9 @@ function Logado({ sessao }: { sessao: Sessao }) {
   if (!qPerfil.data.onboarded_at || tipoLinkInicial === 'invite' && !qPerfil.data.name) {
     return <CriarAcesso email={sessao.email} aoConcluir={async nome => { await qPerfil.refetch(); setPronto(nome) }} />
   }
+  if (qPerfil.data.disabled_at) {
+    return <div className="acesso"><div className="acesso-in"><EstadoVazio icone="block" titulo="Seu acesso está desativado" texto="Fale com o administrador do aplicativo." acao={<button type="button" className="btn btn-secundario" onClick={() => repo.sair()}>Sair</button>} /></div></div>
+  }
   if (qAmb.data.length === 0) {
     return <div className="acesso"><div className="acesso-in"><EstadoVazio icone="folder_off" titulo="Nenhum ambiente encontrado" texto="Fale com o administrador do aplicativo." /></div></div>
   }
@@ -91,6 +95,11 @@ function Logado({ sessao }: { sessao: Sessao }) {
           <Route path="/relatorios" element={<Relatorios />} />
           <Route path="/relatorios/categoria/:id" element={<DetalheCategoria />} />
           <Route path="/mais" element={<Mais />} />
+          <Route path="/mais/categorias" element={<Categorias />} />
+          <Route path="/mais/ambientes" element={<Ambientes />} />
+          <Route path="/mais/lixeira" element={<Lixeira />} />
+          <Route path="/mais/perfil" element={<Perfil />} />
+          <Route path="/mais/usuarios" element={<Usuarios />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Casca>

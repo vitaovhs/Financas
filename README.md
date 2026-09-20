@@ -15,8 +15,8 @@ Projeto de Cleber Urias. Regra do produto: **completo nos dados, simples na util
 
 ## Configuração do Supabase (uma vez)
 
-1. **SQL Editor** → colar o conteúdo de `supabase/migrations/0001_inicial.sql` → **Run**.
-2. **Authentication → Sign In / Providers → Email**: manter e-mail ativo; **desligar "Allow new users to sign up"** (acesso só por convite).
+1. **SQL Editor** → colar e rodar, em ordem, cada arquivo de `supabase/migrations/` (0001, 0002…), uma única vez cada.
+2. **Authentication → Sign In / Providers**: **ligar "Allow new users to sign up"** e **desligar "Confirm email"**. O cadastro continua fechado: o banco só aceita quem tem um convite válido criado pelo administrador (Mais → Usuários e convites).
 3. **Authentication → URL Configuration**: *Site URL* = endereço do app publicado (ex.: `https://SEU-USUARIO.github.io/financas/`) e o mesmo em *Redirect URLs*.
 4. **Criar acessos** em **Authentication → Users → Add user**:
    - *Create new user* com e-mail e uma senha provisória (marcar *Auto Confirm*). No primeiro acesso o app pede nome e nova senha.

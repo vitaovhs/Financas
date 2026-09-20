@@ -1,0 +1,27 @@
+import { chromium } from 'playwright'
+const OUT = process.env.OUT
+const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
+const erros = []
+const p = await (await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, locale: 'pt-BR' })).newPage()
+p.on('pageerror', e => erros.push(e.message))
+await p.goto('file://' + process.cwd() + '/dist/index.html')
+await p.fill('#email', 'a@b.com'); await p.fill('#senha', 'x'); await p.click('button[type=submit]')
+await p.waitForSelector('text=Para onde foi')
+const snap = async n => { await p.waitForTimeout(350); await p.screenshot({ path: `${OUT}/mais-${n}.png` }) }
+await p.click('.barra-inferior >> text=Mais'); await snap('01-menu')
+await p.click('text=Categorias'); await snap('02-categorias')
+await p.click('.item-cat >> nth=0'); await snap('03-editar-cat')
+await p.click('text=Excluir'); await snap('04-excluir-cat')
+await p.click('text=Cancelar'); await p.keyboard.press('Escape')
+await p.click('text=Reordenar'); await snap('05-reordenar')
+await p.click('text=Concluir'); await p.click('[aria-label=Voltar]')
+await p.click('text=Lixeira'); await snap('06-lixeira')
+await p.click('[aria-label=Voltar]'); await p.click('text=Usuários e convites')
+await p.fill('#c-email', 'pai@exemplo.com'); await p.click('text=Criar convite'); await snap('07-convite')
+const link = await p.textContent('.link-convite')
+await p.keyboard.press('Escape'); await snap('08-usuarios')
+await p.click('[aria-label=Voltar]'); await p.click('.lista-card >> text=Perfil e segurança'); await snap('09-perfil')
+await p.click('[aria-label=Voltar]'); await p.click('.lista-card >> text=Ambientes'); await snap('10-ambientes')
+console.log('link:', link)
+console.log(erros.join('\n') || 'sem erros')
+await b.close()

@@ -234,3 +234,96 @@ export function TudoPronto({ nome, aoIr }: { nome: string; aoIr: () => void }) {
     </Tela>
   )
 }
+
+/** Mostra "Tudo pronto" depois de aceitar um convite. */
+export const boasVindas: { nome: string | null } = { nome: null }
+
+/** Aceitar convite: link enviado pelo administrador (…/convite?t=TOKEN). */
+export function AceitarConvite() {
+  const token = new URLSearchParams(window.location.search).get('t') ?? ''
+  const nav = useNavigate()
+  const online = useOnline()
+  const [estado, setEstado] = useState<'carregando' | 'valido' | 'invalido' | 'usado' | 'vencido' | 'revogado' | 'erro'>('carregando')
+  const [email, setEmail] = useState('')
+  const [nome, setNome] = useState('')
+  const [senha, setSenha] = useState('')
+  const [erroNome, setErroNome] = useState<string | null>(null)
+  const [erroSenha, setErroSenha] = useState<string | null>(null)
+  const [erro, setErro] = useState<string | null>(null)
+  const [ocupado, setOcupado] = useState(false)
+  useEffect(() => {
+    if (!token) { setEstado('invalido'); return }
+    repo.validarConvite(token)
+      .then(r => { if (!r) setEstado('invalido'); else { setEmail(r.email); setEstado(r.situacao) } })
+      .catch(() => setEstado('erro'))
+  }, [token])
+  const ok = senha.length >= 10
+  const enviar = async (e: FormEvent) => {
+    e.preventDefault()
+    const n = nome.trim()
+    setErroNome(n ? null : 'Informe seu nome.')
+    setErroSenha(ok ? null : 'A senha precisa ter pelo menos 10 caracteres.')
+    if (!n || !ok) return
+    setOcupado(true); setErro(null)
+    try {
+      boasVindas.nome = n
+      await repo.aceitarConvite(token, email, n, senha)
+      window.history.replaceState(null, '', import.meta.env.BASE_URL)
+    } catch (x) {
+      boasVindas.nome = null
+      const m = ((x as Error).message ?? '').toLowerCase()
+      setErro((x as { code?: string }).code === 'confirmar_email' ? (x as Error).message
+        : /already registered|already exists/.test(m) ? 'Já existe um acesso com este e-mail. Use "Entrar".'
+        : /convite|database error/.test(m) ? 'Este convite não é mais válido. Peça um novo ao administrador.'
+        : traduzErro(x, online))
+    } finally { setOcupado(false) }
+  }
+  if (estado !== 'valido') {
+    const txt: Record<string, [string, string]> = {
+      carregando: ['Conferindo o convite…', ''],
+      invalido: ['Convite não encontrado', 'Confira se o link foi copiado inteiro ou peça um novo ao administrador.'],
+      usado: ['Este convite já foi usado', 'Se o acesso é seu, entre com seu e-mail e senha.'],
+      vencido: ['Este convite venceu', 'Convites valem por 7 dias. Peça um novo ao administrador.'],
+      revogado: ['Este convite foi cancelado', 'Peça um novo ao administrador.'],
+      erro: ['Não foi possível conferir o convite', 'Verifique a internet e tente de novo.'],
+    }
+    const [t, d] = txt[estado]
+    return (
+      <Tela>
+        <Marca />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
+          <h1 className="t-titulo">{t}</h1>
+          {d && <p className="sec">{d}</p>}
+          {estado === 'carregando' && <span className="spinner" />}
+        </div>
+        {estado !== 'carregando' && <button type="button" className="btn btn-secundario btn-largo" onClick={() => nav('/entrar', { replace: true })}>Ir para Entrar</button>}
+      </Tela>
+    )
+  }
+  return (
+    <Tela>
+      <Marca />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <h1 className="t-titulo">Criar seu acesso</h1>
+        <p className="sec">Você foi convidado para o Finanças. Escolha seu nome e uma senha; use-os sempre que entrar.</p>
+      </div>
+      <form onSubmit={enviar} style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }} noValidate>
+        {erro && <Faixa tipo="erro">{erro}</Faixa>}
+        <div className="campo">
+          <label htmlFor="cv-email">E-mail</label>
+          <input id="cv-email" className="input" value={email} disabled autoComplete="username" />
+          <span className="ajuda" style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Icone n="lock" s={16} />Definido pelo convite</span>
+        </div>
+        <div className="campo">
+          <label htmlFor="cv-nome">Seu nome</label>
+          <input id="cv-nome" className={'input' + (erroNome ? ' com-erro' : '')} autoComplete="given-name" maxLength={80} value={nome} onChange={e => setNome(e.target.value)} />
+          {erroNome && <span className="erro-campo"><Icone n="error" s={16} />{erroNome}</span>}
+        </div>
+        <CampoSenha id="cv-senha" valor={senha} aoMudar={setSenha} novo erro={erroSenha}
+          ajuda={!erroSenha && <span className="t-auxiliar" style={{ display: 'flex', alignItems: 'center', gap: 4, color: ok ? 'var(--entrada)' : 'var(--texto-secundario)' }}><Icone n={ok ? 'check_circle' : 'radio_button_unchecked'} s={16} />Pelo menos 10 caracteres</span>} />
+        <div style={{ flex: 1 }} />
+        <button type="submit" className="btn btn-primario btn-largo" disabled={ocupado}>{ocupado ? <span className="spinner" /> : 'Criar acesso'}</button>
+      </form>
+    </Tela>
+  )
+}

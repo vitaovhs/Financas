@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-import type { Ambiente, Anexo, Categoria, EventoAuth, Filtros, FotoPreparada, Lancamento, LancamentoEntrada, Repositorio, Sessao, Totais } from './types'
+import type { Ambiente, Anexo, Categoria, Convite, EventoAuth, UsuarioAdmin, Filtros, FotoPreparada, Lancamento, LancamentoEntrada, Repositorio, Sessao, Totais } from './types'
 
 // Captura o tipo do link (convite/recuperação) antes que o cliente limpe a URL.
 const hashInicial = typeof window !== 'undefined' ? window.location.hash : ''
@@ -112,6 +112,7 @@ export function criarRepoSupabase(url: string, chave: string): Repositorio {
         default_workspace_id: p.default_workspace_id,
         onboarded_at: p.onboarded_at,
         is_admin: r?.role === 'admin',
+        disabled_at: p.disabled_at ?? null,
       }
     },
     async atualizarPerfil(dados) {
@@ -199,6 +200,104 @@ export function criarRepoSupabase(url: string, chave: string): Repositorio {
       })
       if (arquivos.length) await sb.storage.from(BUCKET).remove(arquivos)
       await sb.from('transactions').delete().in('id', data.map((r: { id: string }) => r.id))
+    },
+
+    // ---------------- Categorias ----------------
+    async criarCategoria(ws, c) {
+      const { data: ult } = await sb.from('categories').select('sort').eq('workspace_id', ws).eq('kind', c.kind).eq('is_other', false).order('sort', { ascending: false }).limit(1)
+      const sort = ((ult?.[0] as { sort: number } | undefined)?.sort ?? 0) + 1
+      const { data, error } = await sb.from('categories').insert({ workspace_id: ws, kind: c.kind, name: c.name.trim(), icon: c.icon, color: c.color, sort }).select().single()
+      if (error) erro(error)
+      return data as Categoria
+    },
+    async editarCategoria(id, patch) {
+      const { error } = await sb.from('categories').update(patch).eq('id', id)
+      if (error) erro(error)
+    },
+    async reordenarCategorias(ids) {
+      const res = await Promise.all(ids.map((id, i) => sb.from('categories').update({ sort: i + 1 }).eq('id', id)))
+      const e = res.find(r => r.error)?.error
+      if (e) erro(e)
+    },
+    async usoCategoria(id) {
+      const { data, error } = await sb.rpc('contar_uso_categoria', { p_categoria: id })
+      if (error) erro(error)
+      return Number(data ?? 0)
+    },
+    async moverLancamentos(de, para) {
+      const { error } = await sb.rpc('mover_lancamentos_categoria', { p_de: de, p_para: para })
+      if (error) erro(error)
+    },
+    async excluirCategoria(id) {
+      const { error } = await sb.from('categories').delete().eq('id', id)
+      if (error) erro(error)
+    },
+    // ---------------- Ambientes ----------------
+    async todosAmbientes() {
+      const { data, error } = await sb.from('workspaces').select('*').order('created_at')
+      if (error) erro(error)
+      return data as Ambiente[]
+    },
+    async editarAmbiente(id, patch) {
+      const { error } = await sb.from('workspaces').update(patch).eq('id', id)
+      if (error) erro(error)
+    },
+    // ---------------- Lixeira ----------------
+    async lixeira(ws) {
+      const { data, error } = await sb.from('transactions').select('*, attachments(*)')
+        .eq('workspace_id', ws).not('deleted_at', 'is', null).order('deleted_at', { ascending: false }).limit(300)
+      if (error) erro(error)
+      return (data as Record<string, unknown>[]).map(mapLanc)
+    },
+    // ---------------- Conta ----------------
+    async trocarSenha(atual, nova) {
+      const u = await uid()
+      const { error: e1 } = await sb.auth.signInWithPassword({ email: u.email ?? '', password: atual })
+      if (e1) { const x = new Error('Senha atual incorreta') as Error & { code?: string }; x.code = 'senha_atual'; throw x }
+      const { error } = await sb.auth.updateUser({ password: nova })
+      if (error) erro(error)
+    },
+    async sairDeTodos() {
+      await sb.auth.signOut({ scope: 'global' })
+    },
+    // ---------------- Convites e administração ----------------
+    async validarConvite(token) {
+      const { data, error } = await sb.rpc('validar_convite', { p_token: token })
+      if (error) erro(error)
+      const r = (data as { email: string; situacao: 'valido' | 'usado' | 'revogado' | 'vencido' }[])[0]
+      return r ?? null
+    },
+    async aceitarConvite(token, email, nome, senha) {
+      const { data, error } = await sb.auth.signUp({ email, password: senha, options: { data: { name: nome.trim(), convite: token } } })
+      if (error) erro(error)
+      if (!data.session) {
+        // Projeto com confirmação de e-mail ligada: tenta entrar direto
+        const { error: e2 } = await sb.auth.signInWithPassword({ email, password: senha })
+        if (e2) { const x = new Error('Acesso criado. Confirme o e-mail recebido para entrar.') as Error & { code?: string }; x.code = 'confirmar_email'; throw x }
+      }
+    },
+    async criarConvite(email) {
+      const { data, error } = await sb.rpc('criar_convite', { p_email: email })
+      if (error) erro(error)
+      return (data as { id: string; email: string; token: string; expires_at: string }[])[0]
+    },
+    async convites() {
+      const { data, error } = await sb.rpc('listar_convites')
+      if (error) erro(error)
+      return data as Convite[]
+    },
+    async revogarConvite(id) {
+      const { error } = await sb.rpc('revogar_convite', { p_id: id })
+      if (error) erro(error)
+    },
+    async usuarios() {
+      const { data, error } = await sb.rpc('admin_usuarios')
+      if (error) erro(error)
+      return data as UsuarioAdmin[]
+    },
+    async desativarUsuario(id, desativar) {
+      const { error } = await sb.rpc('admin_desativar', { p_user: id, p_desativar: desativar })
+      if (error) erro(error)
     },
 
     async anexarFoto(ws, txId, foto: FotoPreparada, substituir) {

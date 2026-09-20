@@ -7,6 +7,7 @@ export interface Perfil {
   default_workspace_id: string | null
   onboarded_at: string | null
   is_admin: boolean
+  disabled_at: string | null
 }
 
 export interface Ambiente {
@@ -92,6 +93,10 @@ export interface FotoPreparada {
 
 export interface Sessao { userId: string; email: string }
 
+export interface Convite { id: string; email: string; created_at: string; expires_at: string; accepted_at: string | null; revoked_at: string | null; situacao: 'pendente' | 'aceito' | 'revogado' | 'vencido' }
+export interface UsuarioAdmin { id: string; email: string; name: string | null; created_at: string; last_sign_in_at: string | null; disabled_at: string | null; is_admin: boolean }
+export interface NovaCategoria { kind: Tipo; name: string; icon: string; color: number }
+
 export type EventoAuth = 'SIGNED_IN' | 'SIGNED_OUT' | 'PASSWORD_RECOVERY' | 'INVITED' | 'OTHER'
 
 export interface Repositorio {
@@ -120,6 +125,29 @@ export interface Repositorio {
   restaurar(id: string): Promise<void>
   apagarDefinitivo(id: string): Promise<void>
   limparLixeiraVencida(ws: string): Promise<void>
+  // Categorias
+  criarCategoria(ws: string, c: NovaCategoria): Promise<Categoria>
+  editarCategoria(id: string, patch: Partial<Pick<Categoria, 'name' | 'icon' | 'color' | 'sort' | 'archived_at'>>): Promise<void>
+  reordenarCategorias(ids: string[]): Promise<void>
+  usoCategoria(id: string): Promise<number>
+  moverLancamentos(de: string, para: string): Promise<void>
+  excluirCategoria(id: string): Promise<void>
+  // Ambientes
+  todosAmbientes(): Promise<Ambiente[]>
+  editarAmbiente(id: string, patch: Partial<Pick<Ambiente, 'name' | 'icon' | 'color' | 'archived_at'>>): Promise<void>
+  // Lixeira
+  lixeira(ws: string): Promise<Lancamento[]>
+  // Conta
+  trocarSenha(atual: string, nova: string): Promise<void>
+  sairDeTodos(): Promise<void>
+  // Convites e administração
+  validarConvite(token: string): Promise<{ email: string; situacao: 'valido' | 'usado' | 'revogado' | 'vencido' } | null>
+  aceitarConvite(token: string, email: string, nome: string, senha: string): Promise<void>
+  criarConvite(email: string): Promise<{ id: string; email: string; token: string; expires_at: string }>
+  convites(): Promise<Convite[]>
+  revogarConvite(id: string): Promise<void>
+  usuarios(): Promise<UsuarioAdmin[]>
+  desativarUsuario(id: string, desativar: boolean): Promise<void>
   // Fotos
   anexarFoto(ws: string, txId: string, foto: FotoPreparada, substituir: Anexo | null): Promise<Anexo>
   removerFoto(anexo: Anexo): Promise<void>
