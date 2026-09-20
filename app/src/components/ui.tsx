@@ -9,9 +9,9 @@ export function Icone({ n, s, f, className, style, rotulo }: { n: string; s?: 16
   return <span className={cls} style={style} aria-hidden={rotulo ? undefined : true} aria-label={rotulo} role={rotulo ? 'img' : undefined}>{n}</span>
 }
 
-// 50 cores, exibidas em ordem de tonalidade (o número guardado no banco não muda)
-export const CORES = [25, 26, 50, 28, 12, 19, 27, 6, 30, 8, 10, 24, 29, 31, 13, 32, 33, 34, 35, 36, 37, 4, 18, 23, 7, 38, 14, 39, 1, 40, 15, 41, 42, 5, 22, 3, 17, 43, 44, 45, 9, 46, 21, 2, 16, 47, 11, 20, 48, 49]
-export const corCat = (c: number) => `var(--cat-${Math.max(0, Math.min(50, c))})`
+// 85 cores, exibidas em ordem de tonalidade (o número guardado no banco não muda)
+export const CORES = [11, 25, 47, 26, 51, 52, 27, 24, 12, 8, 28, 6, 53, 10, 19, 30, 50, 54, 56, 55, 57, 29, 31, 13, 32, 58, 59, 33, 34, 60, 61, 37, 35, 4, 18, 36, 64, 62, 65, 63, 23, 14, 7, 38, 68, 66, 69, 67, 39, 1, 15, 40, 70, 41, 5, 42, 71, 22, 43, 3, 17, 44, 72, 74, 73, 75, 45, 9, 46, 76, 77, 21, 2, 16, 78, 80, 79, 81, 48, 20, 49, 84, 82, 83, 85]
+export const corCat = (c: number) => `var(--cat-${Math.max(0, Math.min(100, c))})`
 
 export function CirculoCategoria({ icone, cor, g48 }: { icone: string; cor: number; g48?: boolean }) {
   return (
