@@ -138,7 +138,10 @@ export function Lancamentos() {
           {avancado && <span style={{ position: 'absolute', top: 10, right: 10, width: 8, height: 8, borderRadius: 4, background: 'var(--acao)' }} />}
         </button>
       } />
-      <div className="lanc-cab"><h1 className="t-titulo">Lançamentos</h1></div>
+      <div className="lanc-cab">
+        <h1 className="t-titulo">Lançamentos</h1>
+        <button type="button" className="btn btn-primario btn-adicionar" onClick={() => abrirLancamento({ modo: 'novo', tipo: tipo ?? undefined })}><Icone n="add" s={20} />Adicionar</button>
+      </div>
       {mostrarSeletorMes ? <SeletorMes mes={mes} aoMudar={setMes} /> : <div style={{ height: 12 }} />}
 
       <div className="bloco lanc-layout">
