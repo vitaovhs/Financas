@@ -106,3 +106,69 @@
 
 .resumo3-valor { font-size: min(16px, 3.9vw); }
 @media (min-width: 600px) { .resumo3-valor { font-size: 16px; } }
+
+/* ---------- Relatórios ---------- */
+.rel-periodo { display: flex; flex-direction: column; gap: 12px; padding: 4px 0 8px; }
+.rel-grade { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 4px; }
+.rel-ind { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.rel-card { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.rel-sem-pad { padding: 0 0 4px; }
+.rel-sem-pad > .card-cab { padding: 16px 16px 4px; }
+.rel-coluna { display: flex; flex-direction: column; gap: 12px; }
+@media (min-width: 600px) { .rel-grade, .rel-ind, .rel-coluna { gap: 16px; } }
+@media (min-width: 840px) {
+  .rel-grade { grid-template-columns: 1fr 1fr; }
+  .rel-ind, .rel-largo { grid-column: 1 / -1; }
+  .rel-ind { grid-template-columns: repeat(4, 1fr); }
+}
+@media (min-width: 1024px) { .rel-grade, .rel-ind, .rel-coluna { gap: 24px; } }
+
+.grafico { position: relative; width: 100%; }
+.grafico svg { display: block; overflow: visible; touch-action: pan-y; }
+.grafico-eixo { font-size: 12px; font-weight: 500; fill: var(--texto-secundario); font-variant-numeric: tabular-nums; }
+.grafico-rotulo { font-size: 12px; font-weight: 600; fill: var(--texto); font-variant-numeric: tabular-nums; paint-order: stroke; stroke: var(--superficie); stroke-width: 3px; }
+.grafico-dica {
+  position: absolute; z-index: 5; width: 180px; pointer-events: none; background: var(--superficie); border-radius: 8px; box-shadow: var(--sombra-2);
+  padding: 8px 10px; display: flex; flex-direction: column; gap: 2px; font-size: 13px; line-height: 18px; transform: translateY(-100%);
+}
+.grafico-dica span { display: flex; align-items: center; gap: 6px; }
+.grafico-dica i { width: 10px; height: 2px; display: inline-block; flex: none; }
+.grafico-dica b { margin-left: auto; font-weight: 600; font-variant-numeric: tabular-nums; }
+.grafico-legenda { display: flex; flex-wrap: wrap; gap: 4px 16px; padding-top: 8px; font-size: 13px; line-height: 18px; color: var(--texto-secundario); }
+.grafico-legenda span { display: inline-flex; align-items: center; gap: 6px; }
+
+.ranking ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.ranking li button { width: 100%; border: 0; background: transparent; display: flex; align-items: center; gap: 12px; padding: 8px 4px; border-radius: 8px; text-align: left; color: var(--texto); min-height: 52px; }
+.ranking li button:not(:disabled):hover { background: var(--estado-hover); }
+.ranking li button:disabled { cursor: default; }
+.rk-meio { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.rk-linha { display: flex; align-items: center; gap: 8px; }
+.rk-nome { flex: 1; min-width: 0; font-size: 14px; line-height: 20px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rk-val { font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; }
+.rk-trilho { flex: 1; height: 6px; border-radius: 999px; background: var(--fundo); overflow: hidden; }
+.rk-trilho span { display: block; height: 100%; border-radius: 999px; }
+.rk-pct { font-size: 12px; line-height: 16px; color: var(--texto-secundario); width: 36px; text-align: right; }
+
+.tabela-rol { overflow-x: auto; }
+.tabela-meses { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 20px; font-variant-numeric: tabular-nums; }
+.tabela-meses th, .tabela-meses td { padding: 10px 8px; text-align: right; white-space: nowrap; border-top: 1px solid var(--divisoria); }
+.tabela-meses th:first-child { text-align: left; padding-left: 16px; text-transform: capitalize; font-weight: 500; }
+.tabela-meses td:last-child { padding-right: 12px; color: var(--texto-secundario); width: 24px; }
+.tabela-meses thead th { font-size: 12px; line-height: 16px; font-weight: 500; color: var(--texto-secundario); border-top: 0; }
+.tabela-meses tbody tr { cursor: pointer; }
+.tabela-meses tbody tr:hover { background: var(--estado-hover); }
+.tabela-meses tfoot th, .tabela-meses tfoot td { font-weight: 600; }
+.tabela-meses .neg { color: var(--saida); }
+
+.cat-resumo { display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: flex-end; justify-content: space-between; }
+.cat-comparativos { display: flex; flex-wrap: wrap; gap: 12px 24px; }
+.cat-comparativos > span { display: flex; flex-direction: column; }
+.cat-comparativos strong { font-size: 16px; line-height: 24px; }
+.rel-ind .t-valor-card { font-size: min(22px, 5vw); white-space: normal; overflow-wrap: anywhere; }
+@media (max-width: 599px) {
+  .tabela-meses { font-size: 13px; }
+  .tabela-meses th, .tabela-meses td { padding: 10px 6px; }
+  .tabela-meses th:first-child { padding-left: 16px; }
+  .tabela-meses td:last-child { display: none; }
+  .tabela-meses th:last-child:empty { display: none; }
+}

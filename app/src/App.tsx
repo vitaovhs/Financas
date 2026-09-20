@@ -10,7 +10,8 @@ import { CriarAcesso, Login, NovaSenha, RecuperarSenha, TudoPronto } from './scr
 import { Inicio } from './screens/Inicio'
 import { Lancamentos } from './screens/Lancamentos'
 import { LancamentoFolha } from './screens/LancamentoFolha'
-import { Mais, Relatorios } from './screens/Outras'
+import { Mais } from './screens/Outras'
+import { DetalheCategoria, Relatorios } from './screens/Relatorios'
 import { EstadoVazio } from './components/ui'
 
 type Estado = { t: 'carregando' } | { t: 'fora' } | { t: 'dentro'; s: Sessao } | { t: 'recuperacao'; s: Sessao }
@@ -88,6 +89,7 @@ function Logado({ sessao }: { sessao: Sessao }) {
           <Route path="/" element={<Inicio />} />
           <Route path="/lancamentos" element={<Lancamentos />} />
           <Route path="/relatorios" element={<Relatorios />} />
+          <Route path="/relatorios/categoria/:id" element={<DetalheCategoria />} />
           <Route path="/mais" element={<Mais />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

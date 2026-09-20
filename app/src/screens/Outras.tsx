@@ -3,24 +3,9 @@ import { repo } from '../data'
 import { resetarDemo } from '../data/demoRepo'
 import { useApp } from '../state/app'
 import { BarraTopo } from '../components/shell'
-import { Dialogo, EstadoVazio, Icone } from '../components/ui'
+import { Dialogo, Icone } from '../components/ui'
 
-export const VERSAO = '0.1.0 · Entrega 1'
-
-export function Relatorios() {
-  return (
-    <div className="pagina">
-      <BarraTopo />
-      <div className="lanc-cab"><h1 className="t-titulo">Relatórios</h1></div>
-      <div className="bloco" style={{ marginTop: 16 }}>
-        <div className="lista-card">
-          <EstadoVazio icone="bar_chart" titulo="Chegam na próxima entrega"
-            texto="Visão do ano, do mês e de períodos, detalhe por categoria e exportação para Excel (CSV). Enquanto isso, o Início mostra o resumo do mês." />
-        </div>
-      </div>
-    </div>
-  )
-}
+export const VERSAO = '0.2.0 · Entrega 2'
 
 export function Mais() {
   const { perfil, sessao, ambiente, setSeletorAberto, ocultar, setOcultar } = useApp()
