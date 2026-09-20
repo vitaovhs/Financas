@@ -12,7 +12,7 @@ import { CampoSenha } from './Acesso'
 import { ICONES_AMBIENTE, ICONES_CATEGORIA } from '../lib/icones'
 import { dataCurta, dataHora } from '../lib/format'
 
-export const VERSAO = '0.3.1 · Entrega 3'
+export const VERSAO = '0.3.0 · Entrega 3'
 
 function msgErro(e: unknown): string {
   const m = ((e as Error)?.message ?? '').toLowerCase()
@@ -499,12 +499,6 @@ export function linkConvite(token: string) {
   return `${window.location.origin}${import.meta.env.BASE_URL}convite?t=${token}`
 }
 
-function emailConvite(email: string, url: string) {
-  const assunto = 'Convite para o Finanças'
-  const corpo = `Olá!\n\nCriei seu acesso ao Finanças, nosso app de controle financeiro.\n\nToque no link abaixo para criar sua senha (vale por 7 dias e funciona uma única vez):\n${url}\n\nUse este e-mail para entrar: ${email}\n`
-  return `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(corpo)}`
-}
-
 async function compartilharConvite(email: string, url: string, toast: ReturnType<typeof useApp>['toast']) {
   const texto = `Olá! Criei seu acesso ao Finanças, nosso app de controle financeiro. Toque no link para criar sua senha (vale por 7 dias). Use o e-mail ${email}.`
   if (navigator.share) {
@@ -589,10 +583,9 @@ export function Usuarios() {
         {criado && (
           <div style={{ padding: '8px 16px 24px', display: 'flex', flexDirection: 'column', gap: 12 }}>
             <h2 className="t-secao" style={{ paddingTop: 8 }}>Convite criado para {criado.email}</h2>
-            <p className="t-auxiliar sec">Envie o link para a pessoa. O botão de e-mail abre seu aplicativo de e-mail com a mensagem pronta; é só tocar em enviar. O link vale por 7 dias e só funciona uma vez. Por segurança, este link não aparece de novo; se precisar, gere outro.</p>
+            <p className="t-auxiliar sec">Envie o link para a pessoa. Ele vale por 7 dias e só funciona uma vez. Por segurança, este link não aparece de novo; se precisar, gere outro.</p>
             <div className="link-convite tab">{criado.url}</div>
-            <a className="btn btn-primario btn-largo" href={emailConvite(criado.email, criado.url)}><Icone n="mail" s={20} />Enviar por e-mail</a>
-            <button type="button" className="btn btn-secundario btn-largo" onClick={() => compartilharConvite(criado.email, criado.url, toast)}><Icone n="share" s={20} />Enviar pelo WhatsApp ou outro app</button>
+            <button type="button" className="btn btn-primario btn-largo" onClick={() => compartilharConvite(criado.email, criado.url, toast)}><Icone n="share" s={20} />Enviar pelo WhatsApp ou outro app</button>
             <button type="button" className="btn btn-secundario btn-largo" onClick={async () => { try { await navigator.clipboard.writeText(criado.url); toast({ texto: 'Link copiado' }) } catch { toast({ texto: 'Selecione e copie o link acima', icone: 'error' }) } }}><Icone n="content_copy" s={20} />Copiar link</button>
           </div>
         )}
