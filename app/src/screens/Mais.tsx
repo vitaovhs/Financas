@@ -12,7 +12,7 @@ import { CampoSenha } from './Acesso'
 import { ICONES_AMBIENTE, ICONES_CATEGORIA } from '../lib/icones'
 import { dataCurta, dataHora } from '../lib/format'
 
-export const VERSAO = '0.3.0 · Entrega 3'
+export const VERSAO = '0.3.1 · Entrega 3'
 
 function msgErro(e: unknown): string {
   const m = ((e as Error)?.message ?? '').toLowerCase()
