@@ -9,8 +9,9 @@ export function Icone({ n, s, f, className, style, rotulo }: { n: string; s?: 16
   return <span className={cls} style={style} aria-hidden={rotulo ? undefined : true} aria-label={rotulo} role={rotulo ? 'img' : undefined}>{n}</span>
 }
 
-export const CORES = Array.from({ length: 24 }, (_, i) => i + 1)
-export const corCat = (c: number) => `var(--cat-${Math.max(0, Math.min(24, c))})`
+// 50 cores, exibidas em ordem de tonalidade (o número guardado no banco não muda)
+export const CORES = [25, 26, 50, 28, 12, 19, 27, 6, 30, 8, 10, 24, 29, 31, 13, 32, 33, 34, 35, 36, 37, 4, 18, 23, 7, 38, 14, 39, 1, 40, 15, 41, 42, 5, 22, 3, 17, 43, 44, 45, 9, 46, 21, 2, 16, 47, 11, 20, 48, 49]
+export const corCat = (c: number) => `var(--cat-${Math.max(0, Math.min(50, c))})`
 
 export function CirculoCategoria({ icone, cor, g48 }: { icone: string; cor: number; g48?: boolean }) {
   return (
