@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { repo } from './data'
@@ -20,6 +20,8 @@ export default function App() {
   const [st, setSt] = useState<Estado>({ t: 'carregando' })
   const qc = useQueryClient()
   const nav = useNavigate()
+  const estRef = useRef(st.t)
+  estRef.current = st.t
 
   useEffect(() => {
     let vivo = true
@@ -30,7 +32,12 @@ export default function App() {
     })
     const off = repo.aoMudarSessao((ev, s) => {
       if (ev === 'PASSWORD_RECOVERY' && s) setSt({ t: 'recuperacao', s })
-      else if (ev === 'SIGNED_OUT' || !s) { qc.clear(); setSt({ t: 'fora' }); nav('/entrar', { replace: true }) }
+      else if (ev === 'SIGNED_OUT' || !s) {
+        // Só volta para "Entrar" quando alguém que estava dentro saiu; quem abre um link (convite) fica onde está
+        const estava = estRef.current
+        setSt({ t: 'fora' })
+        if (estava === 'dentro' || estava === 'recuperacao') { qc.clear(); nav('/entrar', { replace: true }) }
+      }
       else if (ev === 'SIGNED_IN') setSt(atual => atual.t === 'recuperacao' ? atual : atual.t === 'dentro' && atual.s.userId === s.userId ? atual : { t: 'dentro', s })
     })
     return () => { vivo = false; off() }
