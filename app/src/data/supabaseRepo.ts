@@ -90,7 +90,7 @@ export function criarRepoSupabase(url: string, chave: string): Repositorio {
       await sb.auth.signOut()
     },
     async enviarRecuperacao(email) {
-      const { error } = await sb.auth.resetPasswordForEmail(email.trim(), { redirectTo: window.location.origin + window.location.pathname })
+      const { error } = await sb.auth.resetPasswordForEmail(email.trim(), { redirectTo: window.location.origin + import.meta.env.BASE_URL })
       if (error) erro(error)
     },
     async definirSenha(senha) {
