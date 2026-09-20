@@ -5,7 +5,7 @@ import type { Anexo, Categoria, FotoPreparada, Lancamento, LancamentoEntrada, Ti
 import { useApp, useCategorias, type AberturaLancamento } from '../state/app'
 import { PilulaAmbiente } from '../components/shell'
 import { CirculoCategoria, Dialogo, Faixa, Folha, Icone } from '../components/ui'
-import { dataCurta, dataHora, diasEntre, hojeIso, mesDe, ontemIso, reais } from '../lib/format'
+import { dataCurta, dataHora, diasEntre, hojeIso, isoData, mesDe, ontemIso, reais, type Mes } from '../lib/format'
 import { prepararFoto } from '../lib/foto'
 import { Visualizador } from './Visualizador'
 
@@ -29,8 +29,16 @@ const novoId = () => crypto.randomUUID()
 const centavos = (d: string) => (d ? parseInt(d, 10) : 0)
 const digitosDe = (c: number) => (c > 0 ? String(c) : '')
 
-function formInicial(a: AberturaLancamento): Form {
-  if (a.modo === 'novo') return { id: novoId(), kind: a.tipo ?? 'saida', digitos: '', categoria: a.categoria ?? null, data: a.data ?? hojeIso(), descricao: '', obs: '' }
+// Data padrão: hoje, se o mês aberto na tela for o atual; senão, o mesmo dia dentro do mês aberto
+function dataPadrao(m: Mes): string {
+  const hoje = new Date()
+  if (m.ano === hoje.getFullYear() && m.mes === hoje.getMonth() + 1) return hojeIso()
+  const ultimo = new Date(m.ano, m.mes, 0).getDate()
+  return isoData(new Date(m.ano, m.mes - 1, Math.min(hoje.getDate(), ultimo)))
+}
+
+function formInicial(a: AberturaLancamento, m: Mes): Form {
+  if (a.modo === 'novo') return { id: novoId(), kind: a.tipo ?? 'saida', digitos: '', categoria: a.categoria ?? null, data: a.data ?? dataPadrao(m), descricao: '', obs: '' }
   const l = a.lanc
   return {
     id: a.modo === 'editar' ? l.id : novoId(),
@@ -51,7 +59,7 @@ function FolhaLancamento({ abertura, aoFechar }: { abertura: AberturaLancamento;
   const { ambiente, online, toast, invalidar, marcarRecemSalvo, setMes, mes, abrirLancamento } = useApp()
   const editando = abertura.modo === 'editar'
   const original: Lancamento | null = abertura.modo === 'novo' ? null : abertura.lanc
-  const [f, setF] = useState<Form>(() => formInicial(abertura))
+  const [f, setF] = useState<Form>(() => formInicial(abertura, mes))
   const inicial = useRef(f)
   const [foto, setFoto] = useState<Foto>(() => editando && original?.anexo ? { t: 'existente', anexo: original.anexo } : { t: 'nenhuma' })
   const [detalhes, setDetalhes] = useState(() => !!(original?.note || (editando && original?.anexo)))
