@@ -6,13 +6,13 @@ import { resetarDemo } from '../data/demoRepo'
 import type { Ambiente, Categoria, Lancamento, Tipo } from '../data/types'
 import { useApp, useCategorias } from '../state/app'
 import { BarraTopo } from '../components/shell'
-import { CirculoCategoria, corCat, Dialogo, EstadoVazio, Esqueleto, Faixa, Folha, Icone } from '../components/ui'
+import { CirculoCategoria, CORES, corCat, Dialogo, EstadoVazio, Esqueleto, Faixa, Folha, Icone } from '../components/ui'
 import { ItemLancamento } from '../components/lista'
 import { CampoSenha } from './Acesso'
 import { ICONES_AMBIENTE, ICONES_CATEGORIA } from '../lib/icones'
 import { dataCurta, dataHora } from '../lib/format'
 
-export const VERSAO = '0.3.3 · Entrega 3'
+export const VERSAO = '0.3.4 · Entrega 3'
 
 function msgErro(e: unknown): string {
   const m = ((e as Error)?.message ?? '').toLowerCase()
@@ -169,7 +169,7 @@ function EditarCategoria({ categoria, tipo, todas, aoFechar, aoSalvar }: { categ
   const nova = !categoria
   const usadasCores = new Set(todas.filter(c => c.kind === tipo && !c.archived_at).map(c => c.color))
   const [nome, setNome] = useState(categoria?.name ?? '')
-  const [cor, setCor] = useState(categoria?.color ?? ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].find(c => !usadasCores.has(c)) ?? 1))
+  const [cor, setCor] = useState(categoria?.color ?? (CORES.find(c => !usadasCores.has(c)) ?? 1))
   const [icone, setIcone] = useState(categoria?.icon ?? 'label')
   const [erro, setErro] = useState<string | null>(null)
   const [ocupado, setOcupado] = useState(false)
@@ -225,7 +225,7 @@ function EditarCategoria({ categoria, tipo, todas, aoFechar, aoSalvar }: { categ
             <div className="campo">
               <span className="rotulo">Cor</span>
               <div className="cores" role="radiogroup" aria-label="Cor">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(c => (
+                {CORES.map(c => (
                   <button key={c} type="button" role="radio" aria-checked={cor === c} aria-label={`Cor ${c}`} onClick={() => setCor(c)} style={{ background: corCat(c) }}>
                     {cor === c && <Icone n="check" s={20} />}
                   </button>
@@ -351,7 +351,7 @@ function EditarAmbiente({ amb, podeArquivar, aoFechar, aoSalvar }: { amb: Ambien
           <div className="campo">
             <span className="rotulo">Cor</span>
             <div className="cores" role="radiogroup" aria-label="Cor">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(c => (
+              {CORES.map(c => (
                 <button key={c} type="button" role="radio" aria-checked={cor === c} aria-label={`Cor ${c}`} onClick={() => setCor(c)} style={{ background: corCat(c) }}>{cor === c && <Icone n="check" s={20} />}</button>
               ))}
             </div>

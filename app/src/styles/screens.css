@@ -181,8 +181,8 @@
 .item-cat .item-lanc { flex: 1; }
 .reordenar { display: flex; padding-right: 8px; }
 .reordenar .btn-icone:disabled { opacity: 0.3; }
-.cores { display: grid; grid-template-columns: repeat(5, 48px); gap: 12px; }
-@media (min-width: 400px) { .cores { grid-template-columns: repeat(10, 36px); gap: 8px; } }
+.cores { display: grid; grid-template-columns: repeat(6, minmax(0, 44px)); gap: 10px; }
+@media (min-width: 600px) { .cores { grid-template-columns: repeat(12, 36px); gap: 8px; } }
 .cores button { width: 100%; aspect-ratio: 1; border: 0; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; }
 .cores button[aria-checked="true"] { box-shadow: 0 0 0 2px var(--superficie), 0 0 0 4px var(--acao); }
 .grade-icones { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 4px; }

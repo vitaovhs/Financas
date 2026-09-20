@@ -17,6 +17,7 @@ const [a] = await q(`insert into auth.users (email, raw_user_meta_data) values (
 const [b] = await q(`insert into auth.users (email) values ('bia@x.com') returning id`)
 const A = a.id, B = b.id
 await db.exec(fs.readFileSync(dir + '../migrations/0002_convites_admin.sql', 'utf8'))
+await db.exec(fs.readFileSync(dir + '../migrations/0003_mais_cores.sql', 'utf8'))
 const uuid = () => crypto.randomUUID()
 await t('novo usuário ganha perfil, Pessoal e categorias', async () => {
   const r = await as(A, () => q(`select w.name, (select count(*) from categories c where c.workspace_id=w.id)::int n, p.name pn from workspaces w, profiles p`))

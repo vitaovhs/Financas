@@ -5,7 +5,8 @@ export function Icone({ n, s, f, className, style, rotulo }: { n: string; s?: 16
   return <span className={cls} style={style} aria-hidden={rotulo ? undefined : true} aria-label={rotulo} role={rotulo ? 'img' : undefined}>{n}</span>
 }
 
-export const corCat = (c: number) => `var(--cat-${Math.max(0, Math.min(10, c))})`
+export const CORES = Array.from({ length: 24 }, (_, i) => i + 1)
+export const corCat = (c: number) => `var(--cat-${Math.max(0, Math.min(24, c))})`
 
 export function CirculoCategoria({ icone, cor, g48 }: { icone: string; cor: number; g48?: boolean }) {
   return (
